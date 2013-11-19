@@ -1,8 +1,10 @@
 /*! NProgress (c) 2013, Rico Sta. Cruz
  *  http://ricostacruz.com/nprogress */
 
+ var NProgress;
 ;(function(factory) {
 
+    NProgress = factory($);/*
   if (typeof module === 'function') {
     module.exports = factory(this.jQuery || require('jquery'));
   } else if (typeof define === 'function' && define.amd) {
@@ -10,9 +12,8 @@
       return factory($);
     });
   } else {
-    this.NProgress = factory(this.jQuery);
   }
-
+*/
 })(function($) {
   var NProgress = {};
 
@@ -38,7 +39,7 @@
    *     });
    */
   NProgress.configure = function(options) {
-    $.extend(Settings, options);
+    Object.extend(Settings, options);
     return this;
   };
 
@@ -48,6 +49,7 @@
 
   NProgress.status = null;
 
+  NProgress.animationQueue = [];
   /**
    * Sets the progress bar status, where `n` is a number from `0.0` to `1.0`.
    *
@@ -62,35 +64,45 @@
     NProgress.status = (n === 1 ? null : n);
 
     var $progress = NProgress.render(!started),
-        $bar      = $progress.find('[role="bar"]'),
+        $bar      = Element.select($progress, '[role="bar"]'),
         speed     = Settings.speed,
         ease      = Settings.easing;
 
-    $progress[0].offsetWidth; /* Repaint */
+    $progress.offsetWidth; /* Repaint */
 
-    $progress.queue(function(next) {
+	// Equivalent to jQuery's queue
+	NProgress.animationQueue.push(function() {
       // Set positionUsing if it hasn't already been set
       if (Settings.positionUsing === '') Settings.positionUsing = NProgress.getPositioningCSS();
 
       // Add transition
-      $bar.css(barPositionCSS(n, speed, ease));
+      $bar.each(function(e) {e.setStyle(barPositionCSS(n, speed, ease))});
 
       if (n === 1) {
         // Fade out
-        $progress.css({ transition: 'none', opacity: 1 });
-        $progress[0].offsetWidth; /* Repaint */
-
+        $progress.setStyle({ transition: 'none', opacity: 1 });
+        $progress.offsetWidth; /* Repaint */
+		
+		var next = null;
+		if (NProgress.animationQueue.length > 0) { 
+			next = NProgress.animationQueue.shift();
+		} 
+		
         setTimeout(function() {
-          $progress.css({ transition: 'all '+speed+'ms linear', opacity: 0 });
+          $progress.setStyle({ transition: 'all '+speed+'ms linear', opacity: 0 });
           setTimeout(function() {
             NProgress.remove();
-            next();
+            if (next != null) next();
           }, speed);
         }, speed);
       } else {
-        setTimeout(next, speed);
+        if (next != null) setTimeout(next, speed);
       }
     });
+
+	if (NProgress.animationQueue.length == 1) { 
+		NProgress.animationQueue.shift()();
+	}
 
     return this;
   };
@@ -136,7 +148,6 @@
 
   NProgress.done = function(force) {
     if (!force && !NProgress.status) return this;
-
     return NProgress.inc(0.3 + 0.5 * Math.random()).set(1);
   };
 
@@ -205,23 +216,29 @@
    */
 
   NProgress.render = function(fromStart) {
-    if (NProgress.isRendered()) return $("#nprogress");
-    $('html').addClass('nprogress-busy');
+    if (NProgress.isRendered()) return $("nprogress");
+    $$('html')[0].addClassName('nprogress-busy');
 
-    var $el = $("<div id='nprogress'>")
-      .html(Settings.template);
+    var $el = document.createElement("div");
+	$el.id = 'nprogress';
+    $el.innerHTML = Settings.template;
 
     var perc = fromStart ? '-100' : toBarPerc(NProgress.status || 0);
 
-    $el.find('[role="bar"]').css({
+    $($el).select('[role="bar"]').each(function(e) {e.setStyle({
       transition: 'all 0 linear',
-      transform: 'translate3d('+perc+'%,0,0)'
-    });
+      transform: 'translate3d('+perc+'%,0,0)',
+	  WebkitTransform: 'translate3d('+perc+'%,0,0)',
+	  MozTransform: 'translate3d('+perc+'%,0,0)',
+	  msTransform: 'translate3d('+perc+'%,0,0)',
+	  OTransform: 'translate3d('+perc+'%,0,0)'
+    })
+	});
 
     if (!Settings.showSpinner)
-      $el.find('[role="spinner"]').remove();
+      $el.select('[role="spinner"]').each(function(e) {e.remove()});
 
-    $el.appendTo(document.body);
+	$$('body')[0].insert($el);
 
     return $el;
   };
@@ -231,8 +248,9 @@
    */
 
   NProgress.remove = function() {
-    $('html').removeClass('nprogress-busy');
-    $('#nprogress').remove();
+    $$('html')[0].removeClassName('nprogress-busy');
+	var np = $('nprogress');
+	if (np!=null) np.remove();
   };
 
   /**
@@ -240,7 +258,7 @@
    */
 
   NProgress.isRendered = function() {
-    return ($("#nprogress").length > 0);
+    return ($("nprogress") != null);
   };
 
   /**
@@ -298,9 +316,19 @@
     var barCSS;
 
     if (Settings.positionUsing === 'translate3d') {
-      barCSS = { transform: 'translate3d('+toBarPerc(n)+'%,0,0)' };
+      barCSS = { 
+		transform: 'translate3d('+toBarPerc(n)+'%,0,0)',
+		WebkitTransform: 'translate3d('+toBarPerc(n)+'%,0,0)',
+		MozTransform: 'translate3d('+toBarPerc(n)+'%,0,0)',
+		msTransform: 'translate3d('+toBarPerc(n)+'%,0,0)',
+		OTransform: 'translate3d('+toBarPerc(n)+'%,0,0)'};
     } else if (Settings.positionUsing === 'translate') {
-      barCSS = { transform: 'translate('+toBarPerc(n)+'%,0)' };
+      barCSS = { 
+		transform: 'translate('+toBarPerc(n)+'%,0)',
+		WebkitTransform: 'translate('+toBarPerc(n)+'%,0)',
+		MozTransform: 'translate('+toBarPerc(n)+'%,0)',
+		msTransform: 'translate('+toBarPerc(n)+'%,0)',
+		OTransform: 'translate('+toBarPerc(n)+'%,0)' };
     } else {
       barCSS = { 'margin-left': toBarPerc(n)+'%' };
     }

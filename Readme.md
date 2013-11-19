@@ -4,12 +4,12 @@ NProgress
 Slim progress bars for Ajax'y applications. Inspired by Google, YouTube, and
 Medium.
 
-[![Status](https://secure.travis-ci.org/rstacruz/nprogress.png?branch=master)](http://travis-ci.org/rstacruz/nprogress) 
+Forked from Rico Sta. Cruz. original jQuery's version.
 
 Installation
 ------------
 
-Add jQuery (1.8 or above), [nprogress.js] and [nprogress.css] to your project.
+Add Prototype (tested on 1.7.1), [nprogress.js] and [nprogress.css] to your project.
 
 Basic usage
 -----------
@@ -30,15 +30,6 @@ $(document).on('page:fetch',   function() { NProgress.start(); });
 $(document).on('page:change',  function() { NProgress.done(); });
 $(document).on('page:restore', function() { NProgress.remove(); });
 ~~~
-
-Ideas
------
-
- * Add progress to your Ajax calls! Bind it to the jQuery `ajaxStart` and
- `ajaxStop` events.
-
- * Make a fancy loading bar even without Turbolinks/Pjax! Bind it to
- `$(document).ready` and `$(window).load`.
 
 Advanced usage
 --------------
@@ -132,6 +123,8 @@ Acknowledgements
 
 © 2013, Rico Sta. Cruz. Released under the [MIT License](License.md).
 
+Migrated to PrototypeJS by Diego Jancic.
+
 **NProgress** is authored and maintained by [Rico Sta. Cruz][rsc] with help from 
 its [contributors][c]
 
@@ -144,4 +137,3 @@ its [contributors][c]
 [Turbolinks]: https://github.com/rails/turbolinks
 [nprogress.js]: http://ricostacruz.com/nprogress/nprogress.js
 [nprogress.css]: http://ricostacruz.com/nprogress/nprogress.css
-
