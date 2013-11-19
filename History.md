@@ -1,3 +1,8 @@
+v0.1.2 (forked) -- November 19, 2013
+--------------------------
+
+Migrated to PrototypeJS
+
 v0.1.2 -- August 21, 2013
 --------------------------
 
